@@ -1,7 +1,7 @@
 'use strict'
 const router = require('koa-router')();
-const ProductController = require('./controller/product');
+const RestaurantController = require('./controller/restaurant');
 
-router.use('/businesses', ProductController.routes()).use(ProductController.allowedMethods());
+router.use('/restaurant', RestaurantController.routes()).use(RestaurantController.allowedMethods());
 
 module.exports = router;
