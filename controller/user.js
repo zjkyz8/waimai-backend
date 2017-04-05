@@ -2,6 +2,7 @@
 const router = require('koa-router')();
 const low = require('lowdb');
 const db = low('db/db.json');
+db._.mixin(require('lodash-id'));
 
 router.post('/', function* () {
     
@@ -12,9 +13,22 @@ router.post('/', function* () {
         case 'verify_code':
             this.body = verfiyCode(this.request.body.mobile, this.request.body.code);
             break;
+        case 'create_user': 
+            this.body = createUser(this.request.body.mobile, this.request.body.password);
+            break;
     }
     this.status = 200;
 });
+
+function createUser(mobile, password){
+    let user = db.get('users').find({mobile: mobile}).value();
+    if(user){
+        db.get('users').find({mobile: mobile}).assign({ password: password}).write()
+    } else
+
+        db.get('users').insert({mobile: mobile, password: password}).write();
+    return true
+}
 
 function generateVerifyCode(mobile){
     let verifyCode = getVerifyCode(6);
@@ -25,7 +39,7 @@ function generateVerifyCode(mobile){
 }
 
 function verfiyCode(mobile, code){
-    let verifyCode = db.get('verifyCode').find({mobile: mobile, verifyCode: code}).value();
+    let verifyCode = db.get('verifyCodes').find({mobile: mobile, verifyCode: code}).value();
     if(verifyCode){
         db.get('verifyCodes').remove({mobile: mobile, verifyCode: code}).write();
         return true;
