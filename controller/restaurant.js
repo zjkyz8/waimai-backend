@@ -1,7 +1,7 @@
 'use strict'
 const router = require('koa-router')();
 const low = require('lowdb');
-const db = low('db/db.json')
+const db = low('db/db.json');
 
 router.get('/', function* () {
     let count = db.get('restaurants').size().value();
