@@ -39,4 +39,9 @@ router.patch('/:id', function* () {
     this.status = 200;
 });
 
+router.delete('/:id', function* () {
+    this.body = db.get('addresses').remove({id: this.params.id}).write();
+    this.status = 204;
+});
+
 module.exports = router;
