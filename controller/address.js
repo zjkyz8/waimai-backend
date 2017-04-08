@@ -34,4 +34,9 @@ router.post('/', function* () {
     this.status = 201;
 });
 
+router.patch('/:id', function* () {
+    this.body = db.get('addresses').getById(this.params.id).assign(this.request.body).write();
+    this.status = 200;
+});
+
 module.exports = router;
