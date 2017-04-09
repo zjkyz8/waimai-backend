@@ -4,6 +4,8 @@ const low = require('lowdb');
 const db = low('db/db.json');
 db._.mixin(require('lodash-id'));
 
+const AuthService = require('../service/auth-service');
+
 router.post('/', function* () {
     
     switch(this.query.action){
@@ -18,6 +20,31 @@ router.post('/', function* () {
             break;
     }
     this.status = 200;
+});
+
+router.get('/favorites', function* (){
+    let userId = AuthService.mapTokenToUser(this.request.header.authorization);
+    if(!userId){
+        this.body = {
+            name: 'Unauthorized',
+            message: '无效的Access Token.',
+            status: 401
+        };
+        return this.status = 401;
+    }
+    let pageNumber = this.query.page - 1;
+    let pageSize = this.query.size || 10;
+    let favorites = db.get('users').getById(userId).get('favorites', []).drop(pageSize * pageNumber).take(pageSize)
+        .map((item) => {
+            let restaurant = db.get('restaurants').find({id: parseInt(item.business_id)}).value();
+            return {
+                id: item.id,
+                business_info: restaurant
+            }
+        }).value();
+    this.body = {
+        items: favorites
+    };
 });
 
 router.get('/:id', function* (){
