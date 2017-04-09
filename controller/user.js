@@ -26,6 +26,12 @@ router.get('/:id', function* (){
     this.status = 200;
 });
 
+router.put('/:id', function* (){
+    let user = db.get('users').getById(this.params.id).assign(this.request.body).value();
+    this.body = user;
+    this.status = 200;
+});
+
 function createUser(mobile, password){
     let user = db.get('users').find({mobile: mobile}).value();
     if(user){

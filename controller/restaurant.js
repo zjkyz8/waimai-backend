@@ -1,7 +1,10 @@
 'use strict'
 const router = require('koa-router')();
+const AuthService = require('../service/auth-service');
 const low = require('lowdb');
 const db = low('db/db.json');
+const uuid = require('uuid');
+db._.mixin(require('lodash-id'));
 
 router.get('/', function* () {
     let count = db.get('restaurants').size().value();
@@ -50,6 +53,28 @@ router.get('/:id/products', function* (){
 
         }).value();
     this.body = result;
+});
+
+router.post('/:id/favorite', function* (){
+    let userId = AuthService.mapTokenToUser(this.request.header.authorization);
+    if(!userId){
+        this.body = {
+            name: 'Unauthorized',
+            message: '无效的Access Token.',
+            status: 401
+        };
+        return this.status = 401;
+    }
+    let user = db.get('users').getById(userId).value();
+    let favorites = user.favorites || [];
+    let id = uuid();
+    favorites.push({id: id, business_id: this.params.id});
+    db.get('users').getById(userId).assign({favorites: favorites}).write();
+    this.status = 201;
+    this.body = {
+        id: id,
+        business_info: db.get('restaurants').getById(this.params.id).value()
+    };
 });
 
 module.exports = router;
